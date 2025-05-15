@@ -56,7 +56,7 @@ sudo nano /etc/ssh/sshd_config
 ```
 修改一下内容
 ```bash
-PermitRootLogin no
+PermitRootLogin prohibit-password
 PasswordAuthentication no
 PubkeyAuthentication yes
 ```
