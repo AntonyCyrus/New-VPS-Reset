@@ -72,3 +72,26 @@ sshd -t
 ```bash
 grep -i passwordauthentication /etc/ssh/sshd_config
 ```
+输出
+```bash
+PasswordAuthentication no
+```
+即表示配置正确
+
+7.给密钥文件上锁
+```bash
+sudo chattr +i ~/.ssh/authorized_keys
+```
+如果需要修改公钥文件则需要解锁
+```bash
+sudo chattr -i ~/.ssh/authorized_keys
+```
+验证密钥文件不可修改
+```bash
+echo "# test" >> ~/.ssh/authorized_keys
+```
+输出类似
+```bash
+-bash: /root/.ssh/authorized_keys: Operation not permitted
+```
+即表示设置成功
