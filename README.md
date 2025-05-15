@@ -64,6 +64,10 @@ PubkeyAuthentication yes
 ```bash
 sudo systemctl restart sshd
 ```
+如果遇到报错可用指令排查配置文件语法
+```bash
+sshd -t
+```
 检查是否启用了密码登录
 ```bash
 grep -i passwordauthentication /etc/ssh/sshd_config
