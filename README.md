@@ -16,10 +16,10 @@ dd系统指令为
 ```bash
 ./reinstall.sh <系统名> <版本号> [选项]
 ```
-以Debian 12系统举例
-重装系统为Debian 12同时设置SSH密码为MyNewPass123
+以Debian 13系统举例
+重装系统为Debian 13同时设置SSH密码为MyNewPass123
 ```bash
-bash reinstall.sh debian 12 --password MyNewPass123
+bash reinstall.sh debian 13 --password MyNewPass123
 ```
 以Windows为例
 重装系统为Windows_Server_2022英文版本同时设置SSH密码为MyWinPass2022以及RDP端口为3389
