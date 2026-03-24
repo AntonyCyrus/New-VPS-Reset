@@ -57,131 +57,52 @@ sudo nano /etc/ssh/sshd_config
 修改一下内容
 ```bash
 
-# This is the sshd server system-wide configuration file.  See
-# sshd_config(5) for more information.
+# ==========================================================
+# Optimized sshd_config for Debian VPS
+# ==========================================================
 
-# This sshd was compiled with PATH=/usr/local/bin:/usr/bin:/bin:/usr/games
-
-# The strategy used for options in the default sshd_config shipped with
-# OpenSSH is to specify options with their default value where
-# possible, but leave them commented.  Uncommented options override the
-# default value.
-
-Include /etc/ssh/sshd_config.d/*.conf
-
+# 1. 基础网络设置
 Port 12783
-#AddressFamily any
-#ListenAddress 0.0.0.0
-#ListenAddress ::
+AddressFamily inet         # 强制使用 IPv4 (如果不用 IPv6，可提升部分环境下的解析速度)
+ListenAddress 0.0.0.0
 
-#HostKey /etc/ssh/ssh_host_rsa_key
-#HostKey /etc/ssh/ssh_host_ecdsa_key
-#HostKey /etc/ssh/ssh_host_ed25519_key
-
-# Ciphers and keying
-#RekeyLimit default none
-
-# Logging
-#SyslogFacility AUTH
-#LogLevel INFO
-
-# Authentication:
-
-LoginGraceTime 30s
+# 2. 认证加固
+LoginGraceTime 30s         # 缩短认证超时
 PermitRootLogin prohibit-password
-#StrictModes yes
-MaxAuthTries 2
-#MaxSessions 10
-
+StrictModes yes
+MaxAuthTries 3             # 设为 3 比较稳健，防止多个 SSH Key 轮询失败
 PubkeyAuthentication yes
-
-# Expect .ssh/authorized_keys2 to be disregarded by default in future.
-#AuthorizedKeysFile	.ssh/authorized_keys .ssh/authorized_keys2
-
-#AuthorizedPrincipalsFile none
-
-#AuthorizedKeysCommand none
-#AuthorizedKeysCommandUser nobody
-
-# For this to work you will also need host keys in /etc/ssh/ssh_known_hosts
-#HostbasedAuthentication no
-# Change to yes if you don't trust ~/.ssh/known_hosts for
-# HostbasedAuthentication
-#IgnoreUserKnownHosts no
-# Don't read the user's ~/.rhosts and ~/.shosts files
-#IgnoreRhosts yes
-
-# To disable tunneled clear text passwords, change to "no" here!
 PasswordAuthentication no
-#PermitEmptyPasswords no
-
-# Change to "yes" to enable keyboard-interactive authentication.  Depending on
-# the system's configuration, this may involve passwords, challenge-response,
-# one-time passwords or some combination of these and other methods.
-# Beware issues with some PAM modules and threads.
 KbdInteractiveAuthentication no
+AuthenticationMethods publickey # 显式要求必须公钥认证
 
-# Kerberos options
-#KerberosAuthentication no
-#KerberosOrLocalPasswd yes
-#KerberosTicketCleanup yes
-#KerberosGetAFSToken no
+# 3. 连接稳定性 (防止连接断开)
+TCPKeepAlive yes
+ClientAliveInterval 60     # 每 60 秒发送一次心跳
+ClientAliveCountMax 3      # 连续 3 次无响应才断开
 
-# GSSAPI options
-#GSSAPIAuthentication no
-#GSSAPICleanupCredentials yes
-#GSSAPIStrictAcceptorCheck yes
-#GSSAPIKeyExchange no
+# 4. 访问限制与转发
+X11Forwarding no           # 除非有 GUI 需求，否则设为 no
+AllowTcpForwarding yes     # 允许隧道转发（对于内网穿透等场景有用）
+PermitTTY yes
+MaxSessions 10
 
-# Set this to 'yes' to enable PAM authentication, account processing,
-# and session processing. If this is enabled, PAM authentication will
-# be allowed through the KbdInteractiveAuthentication and
-# PasswordAuthentication.  Depending on your PAM configuration,
-# PAM authentication via KbdInteractiveAuthentication may bypass
-# the setting of "PermitRootLogin prohibit-password".
-# If you just want the PAM account and session checks to run without
-# PAM authentication, then enable this but set PasswordAuthentication
-# and KbdInteractiveAuthentication to 'no'.
-UsePAM yes
+# 5. 日志与信息提示
+SyslogFacility AUTHPRIV
+LogLevel VERBOSE           # 记录更详细的日志（包含指纹），方便排查攻击
+PrintMotd no               # 不显示系统默认消息
+PrintLastLog yes           # 还是建议保留，方便你监控上次登录是否异常
+DebianBanner no            # 隐藏 Debian 特有的版本后缀，减少信息泄露
 
-#AllowAgentForwarding yes
-#AllowTcpForwarding yes
-#GatewayPorts no
-X11Forwarding yes
-#X11DisplayOffset 10
-#X11UseLocalhost yes
-#PermitTTY yes
-PrintMotd no
-#PrintLastLog yes
-#TCPKeepAlive yes
-#PermitUserEnvironment no
-#Compression delayed
-#ClientAliveInterval 0
-#ClientAliveCountMax 3
-#UseDNS no
-#PidFile /run/sshd.pid
-#MaxStartups 10:30:100
-#PermitTunnel no
-#ChrootDirectory none
-#VersionAddendum none
+# 6. 算法性能优化
+# 仅允许强算法 (可选，需确保客户端支持，现代 OpenSSH 都支持)
+KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
 
-# no default banner path
-#Banner none
+# 7. 子系统设置
+Subsystem sftp /usr/lib/openssh/sftp-server
 
-# Allow client to pass locale and color environment variables
+# 8. 默认环境
 AcceptEnv LANG LC_* COLORTERM NO_COLOR
-
-# override default of no subsystems
-Subsystem	sftp	/usr/lib/openssh/sftp-server
-
-# Example of overriding settings on a per-user basis
-#Match User anoncvs
-#	X11Forwarding no
-#	AllowTcpForwarding no
-#	PermitTTY no
-#	ForceCommand cvs server
-
-ChallengeResponseAuthentication no
 
 ```
 重启SSH服务
