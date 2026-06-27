@@ -52,50 +52,45 @@ chmod 600 ~/.ssh/authorized_keys
 6.禁用密码登陆
 编辑配置文件
 ```bash
-sudo nano /etc/ssh/sshd_config
-```
-修改一下内容
-```bash
-
+cat << 'EOF' | sudo tee /etc/ssh/sshd_config
 # ==========================================================
 # Optimized sshd_config for Debian VPS
 # ==========================================================
 
 # 1. 基础网络设置
 Port 12783
-AddressFamily inet         # 强制使用 IPv4 (如果不用 IPv6，可提升部分环境下的解析速度)
+AddressFamily inet
 ListenAddress 0.0.0.0
 
 # 2. 认证加固
-LoginGraceTime 30s         # 缩短认证超时
+LoginGraceTime 30s
 PermitRootLogin prohibit-password
 StrictModes yes
-MaxAuthTries 3             # 设为 3 比较稳健，防止多个 SSH Key 轮询失败
+MaxAuthTries 3
 PubkeyAuthentication yes
 PasswordAuthentication no
 KbdInteractiveAuthentication no
-AuthenticationMethods publickey # 显式要求必须公钥认证
+AuthenticationMethods publickey
 
 # 3. 连接稳定性 (防止连接断开)
 TCPKeepAlive yes
-ClientAliveInterval 60     # 每 60 秒发送一次心跳
-ClientAliveCountMax 3      # 连续 3 次无响应才断开
+ClientAliveInterval 60
+ClientAliveCountMax 3
 
 # 4. 访问限制与转发
-X11Forwarding no           # 除非有 GUI 需求，否则设为 no
-AllowTcpForwarding yes     # 允许隧道转发（对于内网穿透等场景有用）
+X11Forwarding no
+AllowTcpForwarding yes
 PermitTTY yes
 MaxSessions 10
 
 # 5. 日志与信息提示
 SyslogFacility AUTHPRIV
-LogLevel VERBOSE           # 记录更详细的日志（包含指纹），方便排查攻击
-PrintMotd no               # 不显示系统默认消息
-PrintLastLog yes           # 还是建议保留，方便你监控上次登录是否异常
-DebianBanner no            # 隐藏 Debian 特有的版本后缀，减少信息泄露
+LogLevel VERBOSE
+PrintMotd no
+PrintLastLog yes
+DebianBanner no
 
 # 6. 算法性能优化
-# 仅允许强算法 (可选，需确保客户端支持，现代 OpenSSH 都支持)
 KexAlgorithms curve25519-sha256,curve25519-sha256@libssh.org,diffie-hellman-group-exchange-sha256
 
 # 7. 子系统设置
@@ -103,6 +98,7 @@ Subsystem sftp /usr/lib/openssh/sftp-server
 
 # 8. 默认环境
 AcceptEnv LANG LC_* COLORTERM NO_COLOR
+EOF
 
 ```
 重启SSH服务
