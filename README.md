@@ -31,7 +31,8 @@ bash reinstall.sh windows --image-name "windows 2022" --iso "https://software-do
 ```bash
 apt update &&
 apt install -y sudo &&
-apt upgrade -y
+apt upgrade -y &&
+reboot
 ```
 
 4.在本地生成SSH端对端加密密钥对
