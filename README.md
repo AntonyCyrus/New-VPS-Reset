@@ -139,3 +139,8 @@ echo "# test" >> ~/.ssh/authorized_keys
 -bash: /root/.ssh/authorized_keys: Operation not permitted
 ```
 即表示设置成功
+
+8.卸载qemu-guest-agent （可选）
+```bash
+sudo apt purge -y qemu-guest-agent
+```
